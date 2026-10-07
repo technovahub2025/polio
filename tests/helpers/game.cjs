@@ -1,0 +1,4 @@
+const vm=require('node:vm'),fs=require('node:fs');
+function game(seed=93){let randomState=seed;const seededMath=Object.create(Math);seededMath.random=()=>{randomState=(randomState*1664525+1013904223)>>>0;return randomState/4294967296;};const node={classList:{add(){},remove(){}},setAttribute(){},blur(){}};const ctx={console,Math:seededMath,Number,Object,String,localStorage:{getItem(){return null},setItem(){}},document:{querySelector(){return {...node}},querySelectorAll(){return []},addEventListener(){}},window:{},requestAnimationFrame(){},RailwayScene:class{render(){}},setupRunnerInput(){},audio:{pause(){},play(){return Promise.resolve()}},M_TRACK:0,R_TRACK:3,getRandomInt:(a,b)=>a+Math.floor(seededMath.random()*(b-a+1))};vm.createContext(ctx);vm.runInContext(fs.readFileSync('main.js','utf8'),ctx);ctx.window.runner.start();return ctx.window.runner;}
+
+module.exports={game};

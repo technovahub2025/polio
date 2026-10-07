@@ -1,0 +1,7 @@
+.browser-test/
+*-preview.png
+
+.browser-test-animation/
+artifacts/player-animation/
+
+artifacts/level2/
