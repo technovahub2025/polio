@@ -5,3 +5,108 @@
 .hud{z-index:2}.overlay{z-index:1}.toast,.power-hud,.touch-controls,.scene-caption{z-index:3}h2{font-family:"Arial Narrow",Impact,sans-serif;font-weight:700;font-size:64px}.intro-card{max-width:460px}@media(max-width:600px){h2{font-size:42px;line-height:1.04}.intro-card{padding-top:70px}.pill{font-size:8px}.overlay{align-items:center}.intro-card p{font-size:12px}.power-hud{z-index:0}.toast{top:96px}}
 
 footer a{color:inherit;text-decoration:none;cursor:pointer}footer a:hover{color:var(--mint);text-decoration:underline}
+
+.active-power.shield { color: #ffe09a; border-color: #e5b63e; background: #6c2034; }
+
+.vaccine-hud{position:absolute;top:100px;left:26px;width:190px;padding:9px 12px;border:1px solid #62f5ed66;border-radius:8px;background:#102b3dec;color:#b9fffa;z-index:3;pointer-events:none}
+.vaccine-heading{display:flex;justify-content:space-between;gap:12px;font-size:10px;font-weight:700;letter-spacing:.6px}
+#vaccine-meter{display:block;width:100%;height:8px;margin-top:6px;accent-color:#62f5ed}
+#vaccine-ready{margin-top:6px;font-size:9px;font-weight:700;letter-spacing:.5px;color:#ffe09a}
+.vaccine-hud.ready{border-color:#ffd766;animation:vaccine-ready-glow 1.8s ease-in-out infinite alternate}
+@keyframes vaccine-ready-glow{from{box-shadow:0 0 5px #62f5ed33}to{box-shadow:0 0 15px #ffd76666}}
+.game-shell:has(#vaccine-hud:not([hidden])) .toast{top:178px}
+@media(max-width:600px){.vaccine-hud{top:78px;left:12px;width:154px;padding:8px}.vaccine-heading{font-size:9px}#vaccine-ready{font-size:8px}.game-shell:has(#vaccine-hud:not([hidden])) .toast{top:158px}}
+@media(prefers-reduced-motion:reduce){.vaccine-hud.ready{animation:none}}
+
+.tutorial{position:absolute;top:165px;left:12px;right:12px;z-index:3;display:flex;align-items:flex-start;justify-content:center;gap:8px;pointer-events:none}
+.tutorial-card{display:grid;justify-items:center;gap:3px;padding:8px 14px;background:#102b3de8;border:1px solid #bdff774a;border-radius:12px;color:var(--mint);max-width:320px;text-align:center}
+#tutorial-arrow{font-size:42px;line-height:1;animation:training-arrow .8s ease-in-out infinite alternate}
+#tutorial-arrow:empty,#tutorial-progress:empty{display:none}
+#tutorial-message{font-size:14px;letter-spacing:.8px}#tutorial-hint{font-size:10px;color:#d5e5e9}#tutorial-progress,#tutorial-feedback{font-size:11px}
+#tutorial-skip{pointer-events:auto;background:#102b3dec;color:#d5e5e9;border:1px solid #bdff774a;border-radius:8px;padding:9px;font-size:9px}
+@keyframes training-arrow{to{transform:scale(1.18);color:#fff}}
+@media(max-width:600px){.tutorial{top:145px;gap:5px}.tutorial-card{max-width:240px;padding:7px 9px}#tutorial-message{font-size:12px}#tutorial-arrow{font-size:34px}#tutorial-skip{max-width:65px;padding:8px 5px}}
+@media(prefers-reduced-motion:reduce){#tutorial-arrow{animation:none}}
+
+.world-label{position:absolute;bottom:125px;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none;padding:10px 18px;border:1px solid #83e6f288;border-radius:8px;background:#102b3dec;color:#fff0b0;font-size:13px;font-weight:800;letter-spacing:2px;text-align:center;white-space:nowrap}
+@media(max-width:600px){.world-label{bottom:150px;font-size:11px;letter-spacing:1px;padding:9px 12px}}
+
+#world-subtitle{display:block;font-size:9px;letter-spacing:1.5px;margin-top:5px;color:#d6f5e5}#world-subtitle:empty{display:none}
+.world-label{max-width:calc(100% - 24px);white-space:normal}
+
+
+
+.life-hud{position:absolute;top:100px;right:26px;z-index:3;min-width:150px;padding:8px 12px;background:#182a3aef;border:1px solid #eb92a766;border-radius:9px;pointer-events:none}
+.life-hearts{display:flex;gap:5px;color:#bdc8d5;font:28px/1.15 Arial,sans-serif}.life-hearts>span{display:inline-block;width:24px;text-align:center}.life-hearts .filled{color:#ff809d;text-shadow:0 1px 3px #000}
+.life-hud.damaged{border-color:#ff809d}.life-hearts .lost{animation:heart-loss .65s ease-out}
+#life-feedback{position:absolute;right:8px;top:100%;margin-top:4px;font-size:12px;font-weight:800;color:#fff;background:#762c46;padding:3px 7px;border-radius:5px}
+@keyframes heart-loss{0%{transform:scale(1.35);color:#ff809d}45%{transform:scale(.65);opacity:.35}100%{transform:scale(1);opacity:1}}
+@media(max-width:600px){.life-hud{top:78px;right:12px;min-width:0;width:calc(50% - 18px);max-width:150px;padding:7px 8px}.life-hearts{gap:2px;font-size:25px;justify-content:space-between}.life-hearts>span{width:auto}.vaccine-hud{width:calc(50% - 18px);max-width:154px}}
+@media(prefers-reduced-motion:reduce){.life-hearts .lost{animation:none}}
+
+#pause{min-width:44px;min-height:44px;display:grid;place-items:center;padding:6px}
+.pause-overlay{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:#091824d9;overflow:auto}
+.pause-card{width:min(100%,340px);text-align:center;padding:24px;background:#142b3a;border:1px solid #bed8e644;border-radius:16px;box-shadow:0 18px 60px #0005}
+.pause-card h2{font:800 clamp(26px,4vw,38px)/1.1 sans-serif;color:#fff;letter-spacing:0;margin:0 0 24px}
+.pause-card button{display:block;width:100%;min-height:48px;margin:12px 0 0;border-radius:8px;font-size:16px;font-weight:800}
+.pause-card button:not(.primary){background:#203d4d;color:#e6f3f6;border:1px solid #ffffff30}
+.pause-card .primary{min-width:0}.is-paused *{animation-play-state:paused!important}
+.is-paused .touch-controls{pointer-events:none;visibility:hidden}
+
+/* Full viewport game presentation. */
+html:has(body.game-page),body.game-page{width:100%;height:100%;min-height:100%;overflow:hidden}
+body.game-page{width:100vw;height:100vh;height:100dvh;min-height:100dvh;overscroll-behavior:none}
+.game-page .topbar,.game-page .game-heading,.game-page .below-game,.game-page .power-guide,.game-page footer{display:none}
+.game-page main{width:100%;height:100%;max-width:none;margin:0;padding:0}
+.game-page .game-shell{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;min-height:100dvh;border:0;border-radius:0;box-shadow:none}
+.game-page #glcanvas{width:100%;height:100%}
+.game-page .overlay{padding:clamp(24px,6vw,88px);padding-right:clamp(100px,18vw,260px)}
+.game-page .intro-card{max-width:min(460px,68vw);padding-top:0}
+.game-page .hud{top:max(18px,env(safe-area-inset-top));left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right))}
+.game-page .run-stats{margin-right:72px}
+.game-page .game-sound{position:fixed;z-index:4;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:grid;place-items:center;width:46px;height:46px;padding:0;font-size:20px;background:#102b3dcc;backdrop-filter:blur(10px)}
+.game-page .game-sound span{display:none}
+.game-page .touch-controls{position:absolute;z-index:5;top:50%;right:max(16px,env(safe-area-inset-right));bottom:auto;left:auto;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;padding:9px;border:1px solid #ffffff25;border-radius:16px;background:#1023339c;backdrop-filter:blur(10px)}
+.game-page .touch-controls button{display:grid;place-items:center;width:52px;height:52px;min-width:44px;min-height:44px;border:1px solid #ffffff35;border-radius:12px;background:#16364bbd;color:#fff;font-size:21px;touch-action:manipulation}
+.game-page .game-shell:has(.overlay:not(.hidden)) .touch-controls{display:none}
+.game-page .power-hud{right:max(18px,calc(env(safe-area-inset-right) + 78px));bottom:max(18px,env(safe-area-inset-bottom))}
+.game-page .scene-caption{bottom:max(18px,env(safe-area-inset-bottom));left:max(18px,env(safe-area-inset-left))}
+.game-page .instructions-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#07131db8;backdrop-filter:blur(5px)}
+.game-page .instructions-overlay[hidden]{display:none}
+.instructions-card{width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:clamp(22px,4vw,34px);border:1px solid #c3d9e044;border-radius:18px;background:linear-gradient(145deg,#1a3547f5,#101f2cf5);box-shadow:0 24px 90px #0008;color:#f4f8f8}
+.instructions-accent{color:var(--mint);font-size:10px;font-weight:800;letter-spacing:2px}
+.instructions-card h2{margin:10px 0 20px;color:#fff;font:800 clamp(30px,5vw,42px)/1 'Barlow Condensed',Impact,sans-serif;letter-spacing:.2px}
+.instructions-card ul{list-style:none;display:grid;gap:12px;margin:0 0 24px;padding:0}
+.instructions-card li{position:relative;padding-left:22px;color:#d3e0e4;font-size:clamp(14px,2vw,16px);line-height:1.45}
+.instructions-card li::before{content:'•';position:absolute;left:0;top:0;color:var(--mint);font-size:20px;line-height:1}
+.instructions-card .primary{min-width:120px;min-height:48px}
+@media(max-width:600px){.game-page .hud{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top))}.game-page .game-sound{width:44px;height:44px}.game-page .score-group{max-width:126px;padding:8px 10px}.game-page .run-stats{gap:8px;margin-right:58px;padding:8px}.game-page .run-stats strong{font-size:18px}.game-page .run-stats .icon-button{padding:5px 8px}.game-page .overlay{align-items:center;padding:24px 78px 24px 22px;background:linear-gradient(90deg,#09212dd9,#09212d70)}.game-page .intro-card{max-width:100%;padding:0}.game-page .intro-card h2{font-size:clamp(36px,12vw,54px)}.game-page .intro-card p{font-size:12px;line-height:1.55}.game-page .primary{min-width:190px}.game-page .primary span{margin-left:35px}.game-page .touch-controls{right:max(8px,env(safe-area-inset-right));gap:7px;padding:6px}.game-page .touch-controls button{width:44px;height:48px;font-size:18px}.game-page .power-hud{right:max(9px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 70px)}.game-page .active-power{font-size:9px;padding:6px 8px}.game-page .scene-caption{bottom:max(11px,env(safe-area-inset-bottom));left:max(10px,env(safe-area-inset-left));font-size:6px}.game-page .toast{top:max(96px,calc(env(safe-area-inset-top) + 86px))}.instructions-card{width:calc(100% - 0px);padding:22px 20px;border-radius:15px}.instructions-card ul{gap:10px;margin-bottom:20px}}
+@media(max-width:360px){.game-page .score-group{max-width:108px}.game-page .score-group strong{font-size:20px}.game-page .run-stats{margin-right:54px;gap:6px}.game-page .run-stats>div:nth-child(2){display:none}.game-page .overlay{padding-left:16px;padding-right:68px}.game-page .intro-card p br{display:none}.game-page .touch-controls button{width:42px;height:46px}}
+@media(max-width:600px){.hud{gap:8px}.score-group{min-width:0;flex-shrink:1}.score-group strong{font-size:clamp(19px,6vw,24px)}.run-stats{gap:8px;flex-shrink:0;padding:8px}.run-stats strong{font-size:18px}.run-stats .icon-button{padding:6px}}
+
+.run-results{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;overflow:auto;padding:clamp(12px,3vw,30px);background:#06131dcc;backdrop-filter:blur(7px);animation:results-fade .45s ease both}
+.run-results[hidden]{display:none}
+.results-card{position:relative;width:min(600px,100%);max-height:100%;overflow:auto;padding:clamp(22px,4vw,38px);border:1px solid #70d8e65c;border-radius:22px;background:radial-gradient(ellipse at 50% -20%,#21abc330,transparent 48%),linear-gradient(145deg,#17364af7,#0b1b29f7);box-shadow:0 22px 80px #0009,0 0 35px #24d6e21c;color:#f6fbfc;text-align:center;animation:results-pop .56s cubic-bezier(.2,.8,.2,1) both}
+.results-card::before,.results-card::after{position:absolute;z-index:0;content:"";width:150px;height:150px;border:1px solid #45d7e327;border-radius:50%;pointer-events:none;animation:results-ring 2.8s ease-out infinite}
+.results-card::before{top:-95px;left:-75px}.results-card::after{right:-85px;bottom:-105px;animation-delay:1.1s}
+.results-kicker,.results-card h2,.results-subtitle,.results-copy,.results-stats,.results-actions,.new-best-badge{position:relative;z-index:1}
+.results-kicker{color:#75e9f0;font-size:10px;font-weight:800;letter-spacing:2.4px}
+.results-card h2{margin:9px 0 8px;color:#fff;font:800 clamp(38px,7vw,58px)/.98 'Barlow Condensed',Impact,sans-serif;letter-spacing:.2px;text-shadow:0 0 22px #39dfed55}
+.results-subtitle{margin:0 auto 10px;color:#effafb;font-size:clamp(14px,2.4vw,17px);font-weight:700;line-height:1.5}
+.results-copy{max-width:465px;margin:0 auto 20px;color:#c3d8de;font-size:clamp(12px,2vw,14px);line-height:1.6}
+.results-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 20px}
+.results-stats>div{display:grid;align-content:center;gap:6px;min-height:68px;padding:10px 6px;border:1px solid #ffffff19;border-radius:12px;background:#06172372}
+.results-stats span{color:#a8c1ca;font-size:8px;font-weight:800;letter-spacing:1.1px}
+.results-stats strong{color:#dfff93;font:800 clamp(19px,3vw,25px)/1 'Barlow Condensed',Impact,sans-serif}
+.results-stats strong b{font:inherit}.results-actions{display:flex;justify-content:center;gap:11px;flex-wrap:wrap}
+.results-actions .primary{min-height:48px;padding:13px 20px}.results-actions .primary span{margin-left:18px;font-size:17px}
+.results-home{min-height:48px;padding:12px 20px;border:1px solid #b4d5de55;border-radius:7px;background:#ffffff08;color:#e7f4f6;font-size:11px;font-weight:800;letter-spacing:1px}
+.results-home span{margin-left:14px;color:#79e2e9;font-size:17px}
+.new-best-badge{display:table;margin:0 auto 7px;padding:6px 10px;border:1px solid #bdff7770;border-radius:999px;background:#bdff7718;color:#dfff96;font-size:9px;font-weight:900;letter-spacing:1.4px}
+.new-best-badge span{margin-left:4px;color:#fff49a}
+.results-decor{position:absolute;z-index:1;color:#75efff;text-shadow:0 0 15px #4be7ffb3;pointer-events:none;animation:results-float 3s ease-in-out infinite}
+.results-decor-one{top:17%;left:7%;font-size:21px}.results-decor-two{top:11%;right:10%;font-size:20px;animation-delay:.6s}.results-decor-three{right:6%;bottom:26%;font-size:16px;animation-delay:1.2s}
+@keyframes results-fade{from{opacity:0}to{opacity:1}}@keyframes results-pop{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes results-float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-9px) rotate(8deg)}}@keyframes results-ring{0%{transform:scale(.8);opacity:.65}100%{transform:scale(1.35);opacity:0}}
+.game-shell:has(.run-results:not([hidden])) .touch-controls{display:none}
+@media(max-width:600px){.run-results{padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}.results-card{width:min(460px,100%);padding:24px 17px;border-radius:18px}.results-card h2{font-size:clamp(34px,10vw,48px)}.results-subtitle{font-size:13px}.results-copy{margin-bottom:15px;font-size:12px}.results-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:15px}.results-stats>div{min-height:59px;padding:8px 5px}.results-stats span{font-size:8px}.results-actions{gap:8px}.results-actions .primary,.results-home{flex:1;min-width:130px;min-height:48px;padding:11px 12px}.results-decor-one{left:5%;top:10%}.results-decor-two{right:8%;top:7%}.results-decor-three{right:4%;bottom:22%}}
+@media(prefers-reduced-motion:reduce){.run-results,.results-card,.results-card::before,.results-card::after,.results-decor{animation:none}}

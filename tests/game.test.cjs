@@ -1,10 +1,53 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');
 const {game}=require('./helpers/game.cjs');
+test('endless running stays uninterrupted through two full world cycles with ordinary viruses',()=>{
+  const g=game(912),worlds=new Set();let steps=0,viruses=0;
+  while(g.distance<5200&&steps++<15000){
+    // Protect against ordinary obstacles while testing continuous progression.
+    g.invincible=1;const distance=g.distance;g.update(.04);
+    assert.equal(g.state,'running');assert.ok(g.distance>distance);
+    worlds.add(g.environment.id);viruses+=g.items.filter(o=>o.type==='virus').length;
+  }
+  assert.ok(g.distance>=5200);assert.equal(worlds.size,5);assert.ok(viruses>0);assert.equal(g.lives,5);
+});
 test('lane boundaries, jump physics and slide',()=>{const g=game();g.action('left');g.action('left');assert.equal(g.lane,-1);g.action('jump');g.update(.1);assert.ok(g.jumpY>0);g.action('slide');g.update(.1);assert.equal(g.jumpY,0);assert.ok(g.slide>0);});
 test('collectible scoring and double score',()=>{const g=game();g.items=[{type:'drop',lane:0,z:4}];g.powers.double=5;g.update(.01);assert.equal(g.drops,1);assert.ok(g.score>=50);assert.equal(g.items.length,0);});
-test('shield absorbs collision and next unprotected collision ends run',()=>{const g=game();g.items=[{type:'virus',lane:0,z:4}];g.powers.shield=5;g.update(.01);assert.equal(g.state,'running');assert.equal(g.powers.shield,0);g.invincible=0;g.items=[{type:'virus',lane:0,z:4}];g.update(.01);assert.equal(g.state,'over');});
+test('rapid Polio Drop collections overlap feedback and expire without pausing the run',()=>{
+  const g=game();g.items=Array.from({length:3},()=>({type:'drop',lane:0,z:4}));
+  const before=g.score;g.update(.01);
+  assert.equal(g.drops,3);assert.equal(g.items.length,0);
+  assert.equal(g.collectionEffects.length,3);assert.equal(g.particles.length,24);
+  assert.equal(g.score-before,75+g.distance);
+  assert.ok(g.collectionEffects.every(effect=>effect.age>0&&effect.age<.65));
+  const distance=g.distance;g.update(.1);
+  assert.ok(g.distance>distance);assert.equal(g.collectionEffects.length,3);
+  g.update(.6);assert.equal(g.collectionEffects.length,0);assert.equal(g.particles.length,0);
+});
+test('shield absorbs collision and next unprotected virus costs one life',()=>{const g=game();g.items=[{type:'virus',lane:0,z:4}];g.powers.shield=5;g.update(.01);assert.equal(g.state,'running');assert.equal(g.powers.shield,0);g.invincible=0;g.items=[{type:'virus',lane:0,z:4}];g.update(.01);assert.equal(g.state,'running');assert.equal(g.lives,4);});
 test('jump clears barricade and slide clears overhead',()=>{for(const type of ['barrier','overhead']){const g=game();g.items=[{type,lane:0,z:4}];if(type==='barrier')g.jumpY=1.6;else g.slide=.8;g.update(.01);assert.equal(g.state,'running');}});
 test('magnet attracts adjacent drops, boost protects and expires',()=>{const g=game();g.items=[{type:'drop',lane:1,z:0},{type:'virus',lane:0,z:4}];g.powers.magnet=5;g.powers.boost=.5;g.update(.01);assert.equal(g.drops,1);assert.equal(g.state,'running');g.update(.6);assert.equal(g.powers.boost,0);});
+test('flight trail starts and stops with the existing flight state while ground running stays clear',()=>{
+  const g=game();g.items=[];
+  for(let i=0;i<4;i++)g.update(.04);
+  assert.equal(g.animationState,'RUN');assert.equal(g.particles.filter(p=>p.flight).length,0);
+  g.activateFlight();g.flightTrailIn=0;g.update(.04);
+  assert.equal(g.flightMode,true);assert.equal(g.animationState,'FLYING');
+  const trails=g.particles.filter(p=>p.flight);
+  assert.equal(trails.length,1);assert.equal(trails[0].color,'#75e9ff');
+  g.flightMode=false;g.powers.flight=0;g.jumpY=0;g.velocityY=0;g.flightTrailIn=.06;g.update(.04);
+  assert.equal(g.animationState,'RUN');assert.equal(g.particles.filter(p=>p.flight).length,1);
+});
+test('grounded running emits paced footstep ripples, pauses cleanly, and expires each ripple',()=>{
+  const g=game();g.items=[];
+  for(let i=0;i<9;i++)g.update(.04);
+  assert.equal(g.animationState,'RUN');assert.equal(g.footstepRipples.length,0);
+  g.update(.04);assert.equal(g.footstepRipples.length,1);
+  const age=g.footstepRipples[0].age;
+  g.togglePause();g.update(.12);
+  assert.equal(g.footstepRipples.length,1);assert.equal(g.footstepRipples[0].age,age);
+  g.resume();g.jumpY=1;g.velocityY=0;g.update(.4);
+  assert.equal(g.animationState,'LAND');assert.equal(g.footstepRipples.length,0);
+});
 test('pause and restart preserve state or reset run as appropriate',()=>{const g=game();g.update(.1);const d=g.distance;g.togglePause();assert.equal(g.state,'paused');g.frame(16);assert.equal(g.distance,d);g.resume();assert.equal(g.state,'running');g.start();assert.equal(g.distance,0);assert.equal(g.score,0);});
 test('obstacle rows leave at least one free lane and bounded objects',()=>{const g=game();g.items=[];g.spawnRow();const lanes=new Set(g.items.filter(o=>o.type!=='drop').map(o=>o.lane));assert.ok(lanes.size<=2);g.powers.boost=10000;for(let i=0;i<10000;i++){g.invincible=10;g.update(.04);}assert.ok(g.items.length<100);assert.ok(g.speed<=37.7);});
 
@@ -30,8 +73,8 @@ test('virus speed and ordinary wave frequency grow with score',()=>{
   slow.spawnVirusWave();fast.spawnVirusWave();
   assert.ok(fast.items[0].approachSpeed>slow.items[0].approachSpeed);assert.ok(fast.virusIn<=slow.virusIn);
 });
-test('fast virus swept collision preserves shield and game-over behavior',()=>{
-  const g=game();g.items=[{type:'virus',lane:0,z:0,approachSpeed:140}];g.update(.1);assert.equal(g.state,'over');
+test('fast virus swept collision preserves shield and costs one unprotected life',()=>{
+  const g=game();g.items=[{type:'virus',lane:0,z:0,approachSpeed:140}];g.update(.1);assert.equal(g.state,'running');assert.equal(g.lives,4);
   const protectedGame=game();protectedGame.items=[{type:'virus',lane:0,z:0,approachSpeed:140}];protectedGame.powers.shield=5;protectedGame.update(.1);
   assert.equal(protectedGame.state,'running');assert.equal(protectedGame.powers.shield,0);
 });
