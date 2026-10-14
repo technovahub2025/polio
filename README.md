@@ -6,6 +6,10 @@ A polio-awareness endless runner built on the project's original plain JavaScrip
 
 Open `index.html`, or run `npm run dev` and visit http://127.0.0.1:4173. No dependencies or bundler are required. On PowerShell with restricted script execution, use `npm.cmd`.
 
+## Vercel deployment
+
+`vercel.json` validates the application and runs `node scripts/build-site.cjs` to generate `dist/` from the current root files. Vercel serves that directory instead of the legacy copies in `public/`. The generated HTML uses relative asset paths for root hosting; the local `/test_polio/` base remains in the source HTML.
+
 ## Controls
 
 - Left/right arrows or A/D: switch lanes
