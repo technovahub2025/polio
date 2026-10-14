@@ -18,7 +18,7 @@ test('scheduler considers the actual starting lane and prevents late unavoidable
  assert.equal(g.canSchedule([{type:'virus',lane:1,z:3,approachSpeed:30}]),true);
 });
 test('elite scale is rare-sized and its collision footprint grows with its visible mesh',()=>{
- const {g,o}=hazard('elite',1.65);assert.ok(o.scale>=1.5&&o.scale<=2);g.update(.01);assert.equal(g.state,'over');
+ const {g,o}=hazard('elite',1.65);assert.ok(o.scale>=1.5&&o.scale<=2);g.update(.01);assert.equal(g.state,'running');assert.equal(g.lives,4);
  const dodge=hazard('elite');dodge.g.x=3;dodge.g.lane=1;dodge.g.update(.01);assert.equal(dodge.g.state,'running');
 });
 test('chaser observes, delays, moves smoothly, and stops tracking before contact',()=>{
@@ -37,7 +37,7 @@ test('low, medium and high flyers collide at actual heights and support differen
   if(action==='jump')g.jumpY=1.7;if(action==='slide')g.action('slide');if(action==='flight'){g.activateFlight();g.flightPathIn=1e9;g.jumpY=5;}
   g.update(.01);
   const hit=altitude==='low'?action==='run'||action==='slide':altitude==='medium'?action==='run'||action==='jump':action==='flight';
-  assert.equal(g.state,hit?'over':'running',`${altitude} / ${action}`);
+  assert.equal(g.state,'running');assert.equal(g.lives,hit?4:5,`${altitude} / ${action}`);
  }
 });
 test('flight pickup rises smoothly for seven seconds, allows lanes, descends and restores collision',()=>{
@@ -47,12 +47,12 @@ test('flight pickup rises smoothly for seven seconds, allows lanes, descends and
  advance(g,6);assert.equal(g.powers.flight,0);assert.ok(g.jumpY>4);let previous=g.jumpY;
  for(let i=0;i<110;i++){g.update(.02);assert.ok(g.jumpY<=previous);assert.ok(previous-g.jumpY<.4);previous=g.jumpY;}
  assert.equal(g.flightMode,false);assert.equal(g.jumpY,0);advance(g,.2);assert.equal(g.animationState,'RUN');
- g.items=[{type:'virus',lane:1,z:4}];g.update(.01);assert.equal(g.state,'over');
+ g.items=[{type:'virus',lane:1,z:4}];g.update(.01);assert.equal(g.state,'running');assert.equal(g.lives,4);
 });
 test('flight ignores ground hazards but does not disable high-virus collision or shields',()=>{
  const g=quiet();g.activateFlight();g.flightPathIn=1e9;g.jumpY=5;g.items=[{type:'virus',lane:0,z:4},{type:'overhead',lane:0,z:4},{type:'barrier',lane:0,z:4}];g.update(.01);assert.equal(g.state,'running');
  const high=g.makeVirus('flying',0,3,0,'high');high.z=4;g.powers.shield=5;g.items=[high];g.update(.01);assert.equal(g.powers.shield,0);assert.equal(g.state,'running');
- g.invincible=0;high.z=4;high.passed=false;high.collected=false;g.items=[high];g.update(.01);assert.equal(g.state,'over');
+ g.invincible=0;high.z=4;high.passed=false;high.collected=false;g.items=[high];g.update(.01);assert.equal(g.state,'running');assert.equal(g.lives,4);
 });
 test('aerial paths use existing scoring, magnet checks height and pause/restart reset flight',()=>{
  const g=quiet();g.activateFlight();g.spawnFlightPath();const drops=g.items.filter(o=>o.airDrop);assert.equal(drops.length,12);assert.ok(new Set(drops.map(o=>o.y)).size>3);
@@ -74,5 +74,5 @@ test('relative swept collision catches edge crossings during lane changes',()=>{
  assert.equal(g.contactTime({...o,x:3,lane:1},3.8,3,0),-1);
 });
 test('ordinary jumping preserves existing ground power-up and magnet collection',()=>{
- const g=quiet();g.jumpY=1.7;g.powers.magnet=5;g.items=[{type:'drop',lane:1,z:0},{type:'shield',lane:0,z:4}];g.update(.01);assert.equal(g.drops,1);assert.equal(g.powers.shield,18);
+ const g=quiet();g.jumpY=1.7;g.powers.magnet=5;g.items=[{type:'drop',lane:1,z:0},{type:'shield',lane:0,z:4}];g.update(.01);assert.equal(g.drops,1);assert.equal(g.powers.shield,1);
 });

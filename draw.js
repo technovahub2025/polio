@@ -109,6 +109,7 @@ function drawScene(gl, programInfo, buffer, deltaTime, object, projectionMatrix)
     // Lighting
     gl.uniform1i(programInfo.uniformLocations.flash, flash);
     gl.uniform1i(programInfo.uniformLocations.grayscale, grayscale);
+    if (object.fogStrength !== undefined) gl.uniform1f(programInfo.uniformLocations.fogStrength, object.fogStrength);
 
     {
         const vertexCount = object.indices.length;
