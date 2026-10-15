@@ -47,6 +47,18 @@ test('normal grounded RUN omits the old dark oval shadow while airborne states k
   assert.equal(hasGroundShadow(render({animationState:'FLYING',powers:{flight:4},jumpY:5}).draws),true);
   assert.equal(hasGroundShadow(render({animationState:'JUMP',jumpY:1}).draws),true);
 });
+
+test('home renders no procedural hero, and gameplay keeps the existing character',()=>{
+  const home=render({state:'start',animationState:'IDLE'});
+  assert.equal(home.draws.length,0,'no home hero or shadow behind the image');
+  assert.equal(home.scene.playerPose,null);
+  for(const animationState of ['RUN','JUMP','SOMERSAULT','FLYING','HIT','DEATH']){
+    const game=render({state:'running',animationState});
+    assert.equal(game.scene.playerPose.warrior,true);
+    assert.ok(!game.draws.some(d=>String(d.args[6]).startsWith('home-')));
+    assert.ok(game.draws.some(d=>d.kind==='capCrown'),'existing gameplay cap preserved');
+  }
+});
 test('all animation states render finite geometry with connected body groups',()=>{
   for(const state of ['IDLE','RUN','JUMP','FALL','LAND','SOMERSAULT','FLYING','HIT','DEATH']) {
     const {scene,draws}=render({animationState:state,x:3,jumpY:1.2,

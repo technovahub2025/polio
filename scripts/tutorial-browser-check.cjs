@@ -17,7 +17,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await send('Runtime.enable');await send('Page.enable');
   await send('Emulation.setDeviceMetricsOverride',{width:1100,height:850,deviceScaleFactor:1,mobile:false});
   await send('Page.navigate',{url:'http://127.0.0.1:4173/'});await new Promise(r=>setTimeout(r,1800));
-  await evaluate("window.requestAnimationFrame=()=>0");
+  await evaluate("document.querySelector('#instructions-ok').click();window.requestAnimationFrame=()=>0");
   await new Promise(r=>setTimeout(r,100));
   await evaluate("document.querySelector('#start').click();window.advance=n=>{for(let i=0;i<n;i++)runner.update(.01)};window.until=predicate=>{for(let i=0;i<2000&&!predicate();i++)runner.update(.01);if(!predicate())throw Error('Training stalled: '+runner.tutorialStage)};");
   const key=async key=>{await send('Input.dispatchKeyEvent',{type:'keyDown',key});await send('Input.dispatchKeyEvent',{type:'keyUp',key});};

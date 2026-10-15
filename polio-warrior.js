@@ -88,6 +88,8 @@ class PolioWarrior {
   }
 
   render(g) {
+    // Home uses its supplied HTML image; render no 3D hero or shadow there.
+    if(g.state==='start'){this.s.playerPose=null;return;}
     const s=this.s, q=this.pose(g), root=mat4.create();
     mat4.rotateY(root,root,Math.PI); // Preserve the corrected forward direction.
     // A small visual increase; tuck compression keeps the roll compact.
