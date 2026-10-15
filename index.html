@@ -4,12 +4,25 @@
 <head><base href="/test_polio/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101e28"><title>Drop Dash — Run for a polio-free world</title><link rel="stylesheet" href="./index.css"></head>
 <body class="game-page">
 <header class="topbar"><a class="brand" href="./index.html"><span class="brand-icon">&#10010;</span> DROP<span>DASH</span><small>RUN FOR A BETTER TOMORROW</small></a><div class="edition"><span></span> THE POLIO-FREE RUN <b>01</b></div></header>
-<button id="sound" class="icon-button game-sound" aria-label="Enable music">&#9835; <span>SOUND OFF</span></button>
+
 <main>
 <div class="game-heading"><div><span class="eyebrow">A LITTLE COURAGE. A BIG DIFFERENCE.</span><h1>Every drop counts.</h1></div><button id="records" class="text-button">&#9814; &nbsp; Your high score <span id="header-best">0</span> &#8599;</button></div>
 <section class="game-shell" aria-label="Drop Dash endless runner">
 <canvas id="glcanvas" aria-label="Three-lane railway. Use arrow keys to move, jump and slide."></canvas><div class="vignette"></div>
-<div class="hud"><div class="score-group"><span class="hud-label">SCORE</span><strong id="score">000000</strong><span class="best">BEST <b id="best">0</b></span></div><div class="run-stats"><div><span class="hud-label">DISTANCE</span><strong><span id="distance">0</span><small> m</small></strong></div><div><span class="hud-label">MULTIPLIER</span><strong id="multiplier">×1</strong></div><button id="pause" class="icon-button" aria-label="Pause game">&#8545;</button></div></div>
+<div class="hud" aria-label="Run statistics">
+  <div class="score-group"><span class="hud-label">SCORE</span><strong id="score">000000</strong><span class="best">BEST <b id="best">0</b></span></div>
+  <div class="run-stats">
+    <div class="distance-stat"><span class="hud-label">DISTANCE</span><strong><span id="distance">0</span><small> m</small></strong></div>
+    <div class="multiplier-stat"><strong id="multiplier" aria-label="Score multiplier">&#215;1</strong></div>
+    <div class="hud-actions"><button id="pause" class="icon-button" aria-label="Pause game">&#8545;</button><button id="sound" class="icon-button game-sound" aria-label="Enable music">&#9835; <span>SOUND OFF</span></button></div>
+  </div>
+  <div id="life-hud" class="life-hud" role="status" aria-live="polite" aria-label="5 of 5 lives remaining" hidden><div class="life-hearts" aria-hidden="true"><span id="life-heart-0">&#9829;</span><span id="life-heart-1">&#9829;</span><span id="life-heart-2">&#9829;</span><span id="life-heart-3">&#9829;</span><span id="life-heart-4">&#9829;</span></div><span id="life-feedback" aria-hidden="true" hidden>-1 LIFE</span></div>
+  <div id="vaccine-hud" class="vaccine-hud" hidden>
+  <div class="vaccine-heading"><label for="vaccine-meter">VACCINE POWER</label><span id="vaccine-count">0/10</span></div>
+  <progress id="vaccine-meter" max="10" value="0">Vaccine power</progress>
+  <div id="vaccine-ready" hidden>WARRIOR MODE READY</div>
+</div>
+</div>
 <div id="pause-overlay" class="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
 <div class="pause-card"><h2 id="pause-title">GAME PAUSED</h2>
 <button id="pause-resume" class="primary" type="button">&#9654; RESUME</button>
@@ -27,11 +40,7 @@
 <div id="world-label-panel" class="world-label" role="status" aria-live="polite" hidden><span id="world-label"></span><small id="world-subtitle"></small></div>
 <div id="message" class="toast" role="status" aria-live="polite"></div>
 <div class="scene-caption"><span class="live-dot"></span> GREENLINE DISTRICT <span> / </span> <b id="pace">MORNING RUN</b></div>
-<div id="vaccine-hud" class="vaccine-hud" hidden>
-  <div class="vaccine-heading"><label for="vaccine-meter">VACCINE POWER</label><span id="vaccine-count">0/10</span></div>
-  <progress id="vaccine-meter" max="10" value="0">Vaccine power</progress>
-  <div id="vaccine-ready" hidden>WARRIOR MODE READY</div>
-</div>
+
 <div id="power-hud" class="power-hud"></div>
 </section>
 <div class="below-game"><div class="controls"><span class="eyebrow">MAKE YOUR MOVE</span><span><kbd>&#8592;</kbd><kbd>&#8594;</kbd> Switch lanes</span><span><kbd>&#8593;</kbd> Jump</span><span><kbd>&#8595;</kbd> Slide</span><span><kbd>P</kbd> Pause</span><span class="mobile-hint">Swipe to move · up to jump · down to slide</span></div><span class="status-dot">Built for the long run</span></div>

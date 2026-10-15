@@ -13,19 +13,24 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id){const c=callbacks.get(m.id);callbacks.delete(m.id);m.error?c.reject(m.error):c.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')errors.push(m.params.args);};
   const send=(method,params={})=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Timed out: '+method)),15000);callbacks.set(++id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject});ws.send(JSON.stringify({id,method,params}));});
   const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
+  const click=async selector=>{
+    const point=await evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+    await send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',clickCount:1});
+    await send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',clickCount:1});
+  };
   await send('Runtime.enable');await send('Page.enable');
   await send('Page.navigate',{url:'http://127.0.0.1:4173/test_polio/'});await new Promise(r=>setTimeout(r,1800));
   await evaluate('window.requestAnimationFrame=()=>0');await new Promise(r=>setTimeout(r,100));
   await evaluate("document.querySelector('#instructions-ok').click();window.advance=n=>{for(let i=0;i<n;i++)runner.update(.01)}");
-  fs.mkdirSync('artifacts/home-image',{recursive:true});
-  const shot=async name=>{const r=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync('artifacts/home-image/'+name+'.png',Buffer.from(r.data,'base64'));};
+  fs.mkdirSync('artifacts/compact-hud',{recursive:true});
+  const shot=async name=>{const r=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync('artifacts/compact-hud/'+name+'.png',Buffer.from(r.data,'base64'));};
   const swipe=async(dx,dy)=>{
     const x=await evaluate('innerWidth*.5'),y=await evaluate('innerHeight*.60');
     await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
     await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx,y:y+dy}]});
     await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   };
-  for(const [width,height] of [[1366,768],[1440,900],[390,844],[393,852]]){
+  for(const [width,height] of [[1366,768],[1440,900],[390,844],[393,852],[360,800]]){
     const mobile=width<600;
     await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile});
     await evaluate('runner.mainMenu();runner.scene.render(runner)');
@@ -55,9 +60,29 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
     assert.ok(rects.tutorial.bottom<rects.caption.y,'tutorial above caption');
     assert.ok(rects['vaccine-hud'].bottom<rects.tutorial.y,'tutorial clear of HUD');
     assert.ok(rects.score.bottom<rects['vaccine-hud'].y,'vaccine below score');
-    assert.ok(rects['vaccine-hud'].right<=rects['life-hud'].x,'vaccine and hearts separate');
+    assert.ok(rects['life-hud'].bottom<=rects['vaccine-hud'].y,'vaccine below hearts');
     assert.ok(rects.pause.right<=rects.sound.x,'pause and audio separate');
+    const hud=await evaluate(`(()=>{
+      const ids=['score','distance','multiplier','life-hud','vaccine-hud','pause','sound'];
+      const boxes=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return {id,x:r.x,y:r.y,right:r.right,bottom:r.bottom}});
+      const overlaps=[];for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];if(a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y)overlaps.push([a.id,b.id]);}
+      return {overlaps,height:document.querySelector('.hud').getBoundingClientRect().height,hearts:document.querySelectorAll('.life-hearts .filled').length,barHeight:document.querySelector('#vaccine-meter').getBoundingClientRect().height,bestVisible:getComputedStyle(document.querySelector('.best')).display!=='none',overflow:document.documentElement.scrollWidth>innerWidth,cards:['.score-group','.run-stats','.life-hud','.vaccine-hud'].map(s=>{const c=getComputedStyle(document.querySelector(s));return {background:c.backgroundColor,border:c.borderTopWidth}})};
+    })()`);
+    assert.deepEqual(hud.overlaps,[],'HUD fields do not overlap');
+    assert.equal(hud.hearts,5);assert.equal(hud.bestVisible,false);assert.equal(hud.overflow,false);
+    assert.ok(hud.height<=110,'compact HUD height');assert.ok(hud.barHeight<=6,'thin vaccine bar');
+    for(const card of hud.cards){assert.equal(card.background,'rgba(0, 0, 0, 0)');assert.equal(card.border,'0px');}
+    for(const id of ['pause','sound']){assert.ok(rects[id].width>=40&&rects[id].height>=40,'tap target '+id);}
+    await click('#sound');assert.equal(await evaluate('runner.muted'),false);
+    await new Promise(resolve=>setTimeout(resolve,100));assert.equal(await evaluate('audio.paused'),false,'music plays');
+    await click('#sound');assert.equal(await evaluate('runner.muted'),true);assert.equal(await evaluate('audio.paused'),true,'music pauses');
     await shot(width+'-training');
+    await evaluate("Object.assign(runner,{score:12345678,distance:1234567,vaccinePower:10,warriorModeReady:true});runner.powers.double=5;runner.updateHUD()");
+    assert.equal(await evaluate("document.querySelector('#multiplier').textContent"),'\u00d72');
+    assert.equal(await evaluate("document.querySelector('#vaccine-count').textContent"),'10/10');
+    assert.equal(await evaluate("document.querySelector('#vaccine-ready').hidden"),false);
+    assert.ok(await evaluate("(()=>{const a=document.querySelector('.distance-stat strong').getBoundingClientRect(),b=document.querySelector('#multiplier').getBoundingClientRect(),c=document.querySelector('#score').getBoundingClientRect(),d=document.querySelector('.distance-stat strong');return a.right<=b.x&&c.right<a.x&&d.scrollWidth<=d.clientWidth})()"),'long values and distance unit fit');
+    await shot(width+'-full-power');
     if(mobile){
       await swipe(-80,0);await evaluate('advance(35)');assert.equal(await evaluate('runner.tutorialStage'),'MOVE_RIGHT');
       await swipe(80,0);await evaluate('advance(35)');assert.equal(await evaluate('runner.tutorialStage'),'JUMP');
@@ -66,7 +91,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
       await swipe(0,80);assert.equal(await evaluate('runner.animationState'),'SOMERSAULT');
       assert.ok(await evaluate('runner.slide>0'));
     }
-    await evaluate("document.querySelector('#pause').click()");assert.equal(await evaluate('runner.state'),'paused');
+    await click('#pause');assert.equal(await evaluate('runner.state'),'paused');
     assert.equal(await evaluate("document.querySelector('#tutorial').hidden"),true);
     await evaluate("document.querySelector('#pause-resume').click()");assert.equal(await evaluate('runner.state'),'running');
     assert.equal(await evaluate('runner.scene.gl.getError()'),0);
@@ -75,5 +100,11 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await send('Page.reload');await new Promise(r=>setTimeout(r,1800));
   assert.equal(await evaluate("runner.state==='start'&&document.querySelector('#home-warrior').naturalWidth>0"),true,'refresh restores home image');
   assert.deepEqual(errors,[]);
- }finally{ws?.close();chrome.kill();server?.kill();}
+ }finally{
+  ws?.close();chrome.kill();server?.kill();
+  if(chrome.exitCode===null)await new Promise(resolve=>{chrome.once('exit',resolve);setTimeout(resolve,2000);});
+  const tempRoot=path.resolve(require('node:os').tmpdir())+path.sep;
+  if(path.resolve(profile).startsWith(tempRoot)&&/^dropdash-home-ui-[a-zA-Z0-9]+$/.test(path.basename(profile)))
+    fs.rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:200});
+ }
 })().catch(e=>{console.error(e);process.exitCode=1;});
