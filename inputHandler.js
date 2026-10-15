@@ -19,6 +19,7 @@ function setupRunnerInput(game) {
     if(event.target.closest('button,a'))return;
     if(game.state==='paused'){if(key==='Enter'){event.preventDefault();game.resume();}return;}
     if(keys[key]){event.preventDefault();if(!event.repeat)game.action(keys[key]);}
+    else if(key==='Enter'&&game.state==='start')game.showInstructions();
     else if(key==='Enter'&&game.state!=='running')game.start();
     else if(key==='g')grayscale=!grayscale;
     else if(key==='f'){flash=true;setTimeout(()=>{flash=false;},180);}
